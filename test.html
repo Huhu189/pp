@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>chat gpt bestie gw 😜</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: rgb(6, 131, 37);
+      color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .quiz-container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .question {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .options button {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 5px;
+      background-color: #e0e0e0;
+      cursor: pointer;
+    }
+    .options button:hover {
+      background-color: #d0d0d0;
+    }
+    .options button.selected {
+      background-color: #999;
+      color: white;
+    }
+    #nextBtn, #submitBtn {
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background-color: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #result {
+      font-weight: bold;
+      margin-top: 20px;
+    }
+    #username-container {
+      margin-bottom: 20px;
+    }
+    #startBtn {
+      padding: 10px;
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quiz-container" id="start-screen">
+    <h2>Masukkan Username</h2>
+    <div id="username-container">
+      <input type="text" id="username" placeholder="Username kamu" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+      <button id="startBtn" onclick="mulaiQuiz()">Mulai Quiz</button>
+    </div>
+  </div>
+
+  <div class="quiz-container" id="quiz-screen" style="display: none;">
+    <h2>Seberapa Kenal Sama Daniel?</h2>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <button id="nextBtn" onclick="nextQuestion()">Soal Selanjutnya</button>
+    <button id="submitBtn" onclick="submitQuiz()" style="display: none;">Kirim Jawaban</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const soal = [
+      {
+        pertanyaan: "Apa kendaraan yang paling sering dipakai Daniel?",
+        pilihan: ["Motor", "Mobil", "Sepeda", "Jalan Kaki"],
+        jawaban: "Mobil"
+      },
+      {
+        pertanyaan: "Siapa teman terdekatnya?",
+        pilihan: ["juan", "justine", "marsel", "evan"],
+        jawaban: "justine"
+      },
+      {
+        pertanyaan: "Game yang paling sering dimainin?",
+        pilihan: ["roblok", "ml", "gi", "coc"],
+        jawaban: "roblok"
+      },
+      {
+        pertanyaan: "mata pelajatan fav",
+        pilihan: ["seni musik", "mtk", "b inggris", "informatika"],
+        jawaban: "informatika"
+      }
+    ];
+
+    let index = 0;
+    let skor = 0;
+    let jawabanUser = [];
+    let username = "";
+
+    function mulaiQuiz() {
+      const input = document.getElementById("username");
+      if (!input.value.trim()) {
+        alert("Username tidak boleh kosong!");
+        return;
+      }
+      username = input.value.trim();
+      document.getElementById("start-screen").style.display = "none";
+      document.getElementById("quiz-screen").style.display = "block";
+      tampilkanSoal();
+    }
+
+    function tampilkanSoal() {
+      const q = soal[index];
+      document.getElementById("question").textContent = q.pertanyaan;
+      const optionsDiv = document.getElementById("options");
+      optionsDiv.innerHTML = "";
+
+      q.pilihan.forEach(pil => {
+        const btn = document.createElement("button");
+        btn.textContent = pil;
+        btn.onclick = () => {
+          jawabanUser[index] = pil;
+          document.querySelectorAll(".options button").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          nextBtn.disabled = false;
+        };
+        optionsDiv.appendChild(btn);
+      });
+
+      document.getElementById("nextBtn").style.display = index < soal.length - 1 ? "inline-block" : "none";
+      document.getElementById("submitBtn").style.display = index === soal.length - 1 ? "inline-block" : "none";
+      document.getElementById("result").textContent = "";
+      document.getElementById("nextBtn").disabled = true;
+    }
+
+    function nextQuestion() {
+      if (index < soal.length - 1) {
+        index++;
+        tampilkanSoal();
+      }
+    }
+    function submitQuiz() {
+      skor = 0;
+      for (let i = 0; i < soal.length; i++) {
+      if (jawabanUser[i] === soal[i].jawaban) {
+        skor += 25; // Each correct answer adds 25 points
+      }
+      }
+
+      const data = { nama: username, skor: skor };
+
+      fetch("https://script.google.com/macros/s/AKfycbwmlXtUEPSMTFfkho0pp3eQlnYl1n3h-_gXoFB03EwFXhl6arLaYeISscGzGmmA_0YVPA/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+      }).then(() => {
+        tampilkanRank();
+      });
+
+      document.getElementById("question").textContent = "";
+      document.getElementById("options").innerHTML = "";
+      document.getElementById("submitBtn").style.display = "none";
+      document.getElementById("nextBtn").style.display = "none";
+    }
+
+    function tampilkanRank() {
+      fetch("https://script.google.com/macros/s/AKfycbwmlXtUEPSMTFfkho0pp3eQlnYl1n3h-_gXoFB03EwFXhl6arLaYeISscGzGmmA_0YVPA/exec")
+        .then(res => res.json())
+        .then(data => {
+          data.sort((a, b) => b.skor - a.skor);
+          const resultDiv = document.getElementById("result");
+          resultDiv.innerHTML = "<h3>🏆 Ranking:</h3>";
+          data.forEach((item, index) => {
+            resultDiv.innerHTML += `${index + 1}. ${item.nama} - Skor: ${item.skor}<br>`;
+          });
+          resultDiv.innerHTML += "<br><strong>di bawah 25 anomali</strong>";
+        });
+    }
+  </script>
+</body>
+</html>
